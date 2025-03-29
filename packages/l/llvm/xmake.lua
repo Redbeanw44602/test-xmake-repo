@@ -12,7 +12,6 @@ package("llvm")
     add_configs("use_dia",     {description = "Enable DIA SDK to support non-native PDB parsing. (msvc only)", default = true, type = "boolean"})
     add_configs("use_libffi",  {description = "Enable libffi to support the LLVM interpreter to call external functions.", default = false, type = "boolean"})
     add_configs("use_httplib", {description = "Enable cpp-httplib to support llvm-debuginfod serve debug information over HTTP.", default = false, type = "boolean"})
-    add_configs("use_libpfm",  {description = "Enable libpfm to support hardware counter measurements in LLVM tools.", default = true, type = "boolean"})
     add_configs("use_libcxx",  {description = "Use libc++ as C++ standard library instead of libstdc++, ", default = false, type = "boolean"})
     add_configs("use_zlib",    {description = "Indicates whether to use zlib, by default it is only used if available.", default = nil, type = "boolean"})
     add_configs("use_zstd",    {description = "Indicates whether to use zstd, by default it is only used if available.", default = nil, type = "boolean"})
@@ -37,9 +36,6 @@ package("llvm")
         end
         if package:config("use_httplib") then
             package:add("deps", "cpp-httplib")
-        end
-        if package:config("use_libpfm") then
-            package:add("deps", "libpfm", {host = true})
         end
         if package:config("use_libcxx") then
             package:add("deps", "libc++", {host = true})
