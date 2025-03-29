@@ -1,7 +1,7 @@
 name: macOS (arm64)
 
 on:
-  push:
+  pull_request:
     branches:
       - main
 

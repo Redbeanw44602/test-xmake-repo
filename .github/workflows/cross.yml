@@ -1,7 +1,7 @@
 name: Cross
 
 on:
-  push:
+  pull_request:
     branches:
       - main
 

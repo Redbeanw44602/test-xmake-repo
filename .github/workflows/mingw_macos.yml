@@ -1,7 +1,7 @@
 name: MingW (MacOS)
 
 on:
-  push:
+  pull_request:
     branches:
       - main
 
