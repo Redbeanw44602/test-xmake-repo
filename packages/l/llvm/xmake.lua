@@ -1,5 +1,5 @@
 package("llvm")
-    set_kind("toolchain") -- also supports "kind = library"
+    set_kind("toolchain") -- also supports "kind = library" 
     set_homepage("https://llvm.org/")
     set_description("The LLVM Compiler Infrastructure.")
 
