@@ -35,8 +35,9 @@ package("funchook")
             "-DFUNCHOOK_BUILD_TESTS=OFF"
         }
         table.insert(configs, "-DCMAKE_BUILD_TYPE="  .. (package:debug() and "Debug" or "Release"))
+        table.insert(configs, "-DBUILD_SHARED_LIBS=" .. (package:config("shared") and "ON" or "OFF"))
         table.insert(configs, "-DFUNCHOOK_BUILD_SHARED=" .. (package:config("shared") and "ON" or "OFF"))
-        table.insert(configs, "-DFUNCHOOK_BUILD_STATIC=" .. (package:config("shared") and "OFF" or "ON"))
+        -- table.insert(configs, "-DFUNCHOOK_BUILD_STATIC=" .. (package:config("shared") and "OFF" or "ON"))
         if package:config("disasm") then
             if package:is_arch("arm64") then
                 table.insert(configs, "-DFUNCHOOK_DISASM=capstone")
