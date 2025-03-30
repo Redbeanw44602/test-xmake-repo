@@ -36,15 +36,15 @@ package("llvm")
         end
         if package:config("use_httplib") then
             package:add("deps", "cpp-httplib")
-        end
+        en
         if package:config("use_libcxx") then
-            package:add("deps", "libc++", {host = true})
+            package:add("deps", "libc++")
         end
         if package:config("use_zlib") then
-            package:add("deps", "zlib", {host = true})
+            package:add("deps", "zlib")
         end
         if package:config("use_zstd") then
-            package:add("deps", "zstd", {host = true})
+            package:add("deps", "zstd")
         end
 
         -- add components
