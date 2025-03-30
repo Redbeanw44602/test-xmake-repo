@@ -10,6 +10,12 @@ package("funchook")
 
     add_deps("cmake")
     on_load(function(package)
+        if is_plat("windows") then
+            package:add("syslinks", "psapi")
+        else
+            -- unix
+            package:add("syslinks", "dl")
+        end
         if not package:config("disasm") then
             -- default disasm engine.
             if is_arch("arm64") then
