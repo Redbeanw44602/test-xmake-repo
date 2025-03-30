@@ -6,6 +6,8 @@ package("funchook")
     add_urls("https://github.com/kubo/funchook.git")
     add_versions("1.1.3", "88388db3c69e16c1560fee65c6857d75f5ce6fd5")
 
+    add_patches("*", "patches/try-fix-function-visibility.patch", "5b505ad24332320f3970a6cb56b5f550b01b9c80aa14cea0fea74ac77f1fc8f3")
+
     add_configs("disasm", {description = "Disassembler engine.", default = nil, type = "string", values = {"capstone", "distorm", "zydis"}})
 
     add_deps("cmake")
@@ -27,7 +29,8 @@ package("funchook")
         package:add("deps", package:config("disasm"))
     end)
 
-    on_install("linux|x86_64", "linux|arm64", "macosx|x86_64", "windows|x86", "windows|x64", function (package)
+    --- TODO: linux|arm64
+    on_install("linux|x86_64", "linux|i386", "linux|arm64", "macosx|x86_64", "windows|x86", "windows|x64", function (package)
         local configs = {
             "-DFUNCHOOK_BUILD_TESTS=OFF"
         }
