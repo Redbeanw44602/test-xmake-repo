@@ -8,6 +8,8 @@ package("zstr")
     add_urls("https://github.com/mateidavid/zstr.git")
     add_versions("1.0.7", "755da7890ea22478a702e3139092e6c964fab1f5")
 
+    add_patches("1.0.7", "patches/fix-build-on-android-ndksdk-21.patch", "de659eb1160c2957c3786502fd78824b8ecb9284423638feb0999903030f34b7")
+
     add_deps("zlib")
     on_install(function (package)
         os.cp("src/*.hpp", package:installdir("include"))
