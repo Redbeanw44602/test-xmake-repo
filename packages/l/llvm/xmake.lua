@@ -8,13 +8,14 @@ package("llvm")
 
     add_configs("exception", {description = "Enable C++ exception support for LLVM.", default = true, type = "boolean"})
     add_configs("rtti",      {description = "Enable C++ RTTI support for LLVM.", default = true, type = "boolean"})
+    add_configs("lto",       {description = "Enable link-time optimizations for LLVM builds.", default = "on", type = "string", values = {"on", "off", "thin", "full"}})
 
-    add_configs("use_dia",     {description = "Enable DIA SDK to support non-native PDB parsing. (msvc only)", default = true, type = "boolean"})
-    add_configs("use_libffi",  {description = "Enable libffi to support the LLVM interpreter to call external functions.", default = false, type = "boolean"})
-    add_configs("use_httplib", {description = "Enable cpp-httplib to support llvm-debuginfod serve debug information over HTTP.", default = false, type = "boolean"})
-    add_configs("use_libcxx",  {description = "Use libc++ as C++ standard library instead of libstdc++, ", default = false, type = "boolean"})
-    add_configs("use_zlib",    {description = "Indicates whether to use zlib, by default it is only used if available.", default = nil, type = "boolean"})
-    add_configs("use_zstd",    {description = "Indicates whether to use zstd, by default it is only used if available.", default = nil, type = "boolean"})
+    add_configs("ms_dia",  {description = "Enable DIA SDK to support non-native PDB parsing. (msvc only)", default = true, type = "boolean"})
+    add_configs("libffi",  {description = "Enable libffi to support the LLVM interpreter to call external functions.", default = false, type = "boolean"})
+    add_configs("httplib", {description = "Enable cpp-httplib to support llvm-debuginfod serve debug information over HTTP.", default = false, type = "boolean"})
+    add_configs("libcxx",  {description = "Use libc++ as C++ standard library instead of libstdc++, ", default = false, type = "boolean"})
+    add_configs("zlib",    {description = "Indicates whether to use zlib, by default it is only used if available.", default = nil, type = "boolean"})
+    add_configs("zstd",    {description = "Indicates whether to use zstd, by default it is only used if available.", default = nil, type = "boolean"})
 
     includes(path.join(os.scriptdir(), "constants.lua"))
     for _, project in ipairs(constants.get_llvm_known_projects()) do
@@ -31,19 +32,19 @@ package("llvm")
     add_deps("cmake")
     on_load(function (package)
         -- add deps.
-        if package:config("use_libffi") then
+        if package:config("libffi") then
             package:add("deps", "libffi")
         end
-        if package:config("use_httplib") then
+        if package:config("httplib") then
             package:add("deps", "cpp-httplib")
-        en
-        if package:config("use_libcxx") then
+        end
+        if package:config("libcxx") then
             package:add("deps", "libc++")
         end
-        if package:config("use_zlib") then
+        if package:config("zlib") then
             package:add("deps", "zlib")
         end
-        if package:config("use_zstd") then
+        if package:config("zstd") then
             package:add("deps", "zstd")
         end
 
@@ -88,31 +89,32 @@ package("llvm")
         table.insert(configs, "-DLLVM_INCLUDE_TOOLS=" .. (package:is_toolchain() and "ON" or "OFF"))
         table.insert(configs, "-DLLVM_ENABLE_EH=" .. (package:config("exception") and "ON" or "OFF"))
         table.insert(configs, "-DLLVM_ENABLE_RTTI=" .. (package:config("rtti") and "ON" or "OFF"))
-        table.insert(configs, "-DLLVM_ENABLE_DIA_SDK=" .. (package:config("use_dia") and "ON" or "OFF"))
+        table.insert(configs, "-DLLVM_ENABLE_DIA_SDK=" .. (package:config("ms_dia") and "ON" or "OFF"))
         table.insert(configs, "-DLLVM_ENABLE_LIBPFM=" .. (package:config("use_libpfm") and "ON" or "OFF"))
-        table.insert(configs, "-DLLVM_ENABLE_LIBCXX=" .. (package:config("use_libcxx") and "ON" or "OFF"))
-        if package:config("use_libffi") then
+        table.insert(configs, "-DLLVM_ENABLE_LIBCXX=" .. (package:config("libcxx") and "ON" or "OFF"))
+        table.insert(configs, "-DLLVM_ENABLE_LTO=" .. package:config("lto"))
+        if package:config("libffi") then
             table.insert(configs, "-DLLVM_ENABLE_FFI=ON")
             table.insert(configs, "-DFFI_INCLUDE_DIR=" .. package:dep("libffi"):installdir("include"))
             table.insert(configs, "-DFFI_LIBRARY_DIR=" .. package:dep("libffi"):installdir("lib"))
         else
             table.insert(configs, "-DLLVM_ENABLE_FFI=OFF")
         end
-        if package:config("use_httplib") then
+        if package:config("httplib") then
             table.insert(configs, "-DLLVM_ENABLE_HTTPLIB=ON")
             table.insert(configs, "-Dhttplib_ROOT=" .. package:dep("cpp-httplib"):installdir())
         else
             table.insert(configs, "-DLLVM_ENABLE_HTTPLIB=OFF")
         end
-        if package:config("use_zlib") == nil then
+        if package:config("zlib") == nil then
             table.insert(configs, "-DLLVM_ENABLE_ZLIB=ON")
         else
-            table.insert(configs, "-DLLVM_ENABLE_ZLIB=" .. (package:config("use_zlib") and "FORCE_ON" or "OFF"))
+            table.insert(configs, "-DLLVM_ENABLE_ZLIB=" .. (package:config("zlib") and "FORCE_ON" or "OFF"))
         end
-        if package:config("use_zstd") == nil then
+        if package:config("zstd") == nil then
             table.insert(configs, "-DLLVM_ENABLE_ZSTD=ON")
         else
-            table.insert(configs, "-DLLVM_ENABLE_ZSTD=" .. (package:config("use_zstd") and "FORCE_ON" or "OFF"))
+            table.insert(configs, "-DLLVM_ENABLE_ZSTD=" .. (package:config("zstd") and "FORCE_ON" or "OFF"))
         end
 
         os.cd("llvm")
