@@ -46,8 +46,9 @@ package("llvm")
 
     add_deps("cmake")
     on_load(function (package)
+        -- add deps.
         if not package:is_plat("windows", "msys", "cygwin", "mingw") then
-            -- add deps.
+            package:add("deps", "python 3.x", {kind = "binary", host = true})
             if package:config("libffi") then
                 package:add("deps", "libffi")
             end
