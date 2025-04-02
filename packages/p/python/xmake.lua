@@ -50,10 +50,8 @@ package("python")
         add_versions("3.10.11", "f3db31b668efa983508bd67b5712898aa4247899a346f2eb745734699ccd3859")
         add_versions("3.11.3", "1a79f3df32265d9e6625f1a0b31c28eb1594df911403d11f3320ee1da1b3e048")
         add_versions("3.11.8", "d3019a613b9e8761d260d9ebe3bd4df63976de30464e5c0189566e1ae3f61889")
-        add_versions("3.11.9", "e7de3240a8bc2b1e1ba5c81bf943f06861ff494b69fda990ce2722a504c6153d")
         add_versions("3.12.3", "a6b9459f45a6ebbbc1af44f5762623fa355a0c87208ed417628b379d762dddb0")
         add_versions("3.12.8", "5978435c479a376648cb02854df3b892ace9ed7d32b1fead652712bee9d03a45")
-        add_versions("3.13.0", "12445c7b3db3126c41190bfdc1c8239c39c719404e844babbd015a1bc3fafcd4")
         add_versions("3.13.1", "1513925a9f255ef0793dbf2f78bb4533c9f184bdd0ad19763fd7f47a400a7c55")
     end
 
