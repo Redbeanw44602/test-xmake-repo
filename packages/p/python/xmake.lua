@@ -6,7 +6,6 @@ package("python")
     if is_host("windows") then
         if is_arch("x86", "i386") or os.arch() == "x86" then
             add_urls("https://github.com/xmake-mirror/python-windows/releases/download/$(version)/python-$(version).win32.zip")
-            add_versions("2.7.18", "95e21c87c9f38fa8068e014fc3683c3bc2c827f64875e620b9ecd3c75976a79c")
             add_versions("3.7.9", "55c8a408a11e598964f5d581589cf7f8c622e3cad048dce331ee5a61e5a6f57f")
             add_versions("3.8.10", "f520d2880578df076e3df53bf9e147b81b5328db02d8d873670a651fa076be50")
             add_versions("3.9.5", "ce0bfe8ced874d8d74a6cf6a98f13f5afee27cffbaf2d1ee0f09d3a027fab299")
@@ -22,7 +21,6 @@ package("python")
             add_versions("3.13.1", "f89b297ca94ced2fbdad7919518ebf05005f39637f8ec5b01e42f2c71d53a673")
         else
             add_urls("https://github.com/xmake-mirror/python-windows/releases/download/$(version)/python-$(version).win64.zip")
-            add_versions("2.7.18", "6680835ed5b818e2c041c7033bea47ace17f6f3b73b0d6efb6ded8598a266754")
             add_versions("3.7.9", "d0d879c934b463d46161f933db53a676790d72f24e92143f629ee5629ae286bc")
             add_versions("3.8.10", "acf35048274404dd415e190bf5b928fae3b03d8bb5dfbfa504f9a183361468bd")
             add_versions("3.9.5", "3265059edac21bf4c46fac13553a5d78417e7aa209eceeffd0250aa1dd8d6fdf")
@@ -39,7 +37,6 @@ package("python")
         end
     else
         add_urls("https://www.python.org/ftp/python/$(version)/Python-$(version).tgz")
-        add_versions("2.7.18", "da3080e3b488f648a3d7a4560ddee895284c3380b11d6de75edb986526b9a814")
         add_versions("3.7.9", "39b018bc7d8a165e59aa827d9ae45c45901739b0bbb13721e4f973f3521c166a")
         add_versions("3.8.10", "b37ac74d2cbad2590e7cd0dd2b3826c29afe89a734090a87bf8c03c45066cb65")
         add_versions("3.9.5", "e0fbd5b6e1ee242524430dee3c91baf4cbbaba4a72dd1674b90fda87b713c7ab")
@@ -66,8 +63,7 @@ package("python")
         add_syslinks("util", "pthread", "dl")
     end
 
-    on_load("@windows", "@msys", "@cygwin", function (package)
-
+    on_load("windows", "msys", "cygwin", function (package)
         -- set includedirs
         package:add("includedirs", "include")
 
@@ -78,7 +74,7 @@ package("python")
         package:addenv("PATH", "Scripts")
     end)
 
-    on_load("@macosx", "@linux", "@bsd", function (package)
+    on_load("macosx", "linux", "bsd", function (package)
         local version = package:version()
 
         -- set openssl dep
@@ -111,7 +107,7 @@ package("python")
 
     on_fetch("fetch")
 
-    on_install("@windows|x86", "@windows|x64", "@msys", "@cygwin", function (package)
+    on_install("windows|x86", "windows|x64", "msys", "cygwin", function (package)
         if package:version():ge("3.0") then
             os.cp("python.exe", path.join(package:installdir("bin"), "python3.exe"))
         else
@@ -128,7 +124,7 @@ package("python")
         os.vrunv(python, {"-m", "pip", "install", "wheel"})
     end)
 
-    on_install("@macosx", "@bsd", "@linux", function (package)
+    on_install("macosx", "bsd", "linux", function (package)
         local version = package:version()
 
         -- init configs
