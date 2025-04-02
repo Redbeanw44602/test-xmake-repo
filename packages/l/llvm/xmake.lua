@@ -46,21 +46,23 @@ package("llvm")
 
     add_deps("cmake")
     on_load(function (package)
-        -- add deps.
-        if package:config("libffi") then
-            package:add("deps", "libffi")
-        end
-        if package:config("httplib") then
-            package:add("deps", "cpp-httplib")
-        end
-        if package:config("libcxx") then
-            package:add("deps", "libc++")
-        end
-        if package:config("zlib") then
-            package:add("deps", "zlib")
-        end
-        if package:config("zstd") then
-            package:add("deps", "zstd")
+        if not package:is_plat("windows", "msys", "cygwin", "mingw") then
+            -- add deps.
+            if package:config("libffi") then
+                package:add("deps", "libffi")
+            end
+            if package:config("httplib") then
+                package:add("deps", "cpp-httplib")
+            end
+            if package:config("libcxx") then
+                package:add("deps", "libc++")
+            end
+            if package:config("zlib") then
+                package:add("deps", "zlib")
+            end
+            if package:config("zstd") then
+                package:add("deps", "zstd")
+            end
         end
 
         -- add components
@@ -77,7 +79,7 @@ package("llvm")
 
     on_fetch("fetch")
 
-    on_install("windows", "msys", "cygwin", function (package)
+    on_install("windows", "msys", "cygwin", "mingw", function (package)
         os.cp("*", package:installdir())
     end)
 
@@ -168,9 +170,9 @@ package("llvm")
 
     on_test(function (package)
         if package:is_toolchain() and not package:is_cross() then
-            os.vrun(package:installdir() .. "/bin/llvm-config --version")
+            os.vrun("llvm-config --version")
             if package:config("clang") then
-                os.vrun(package:installdir() .. "/bin/clang --version")
+                os.vrun("clang --version")
             end
         elseif package:is_library() then
             if package:config("clang") then
