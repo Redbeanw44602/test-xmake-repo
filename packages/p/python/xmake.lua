@@ -221,9 +221,11 @@ package("python")
     end)
 
     on_test(function (package)
-        os.vrun("python --version")
-        os.vrun("python -c \"import pip\"")
-        os.vrun("python -c \"import setuptools\"")
-        os.vrun("python -c \"import wheel\"")
+        if not package:is_cross() then
+            os.vrun("python --version")
+            os.vrun("python -c \"import pip\"")
+            os.vrun("python -c \"import setuptools\"")
+            os.vrun("python -c \"import wheel\"")
+        end
         assert(package:has_cfuncs("PyModule_New", {includes = "Python.h"}))
     end)
