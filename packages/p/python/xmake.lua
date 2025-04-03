@@ -16,12 +16,6 @@ package("python")
         add_versions("3.13.1", "1513925a9f255ef0793dbf2f78bb4533c9f184bdd0ad19763fd7f47a400a7c55")
     end
 
-    add_configs("headeronly", {description = "Use header only version.", default = false, type = "boolean"})
-
-    if not is_plat(os.host()) or not is_arch(os.arch()) then
-        set_kind("binary")
-    end
-
     if is_host("linux", "bsd") then
         add_deps("libffi", "zlib", {host = true, private = true})
         add_syslinks("util", "pthread", "dl")
@@ -63,10 +57,6 @@ package("python")
         package:addenv("PYTHONPATH", PYTHONPATH)
         package:addenv("PATH", "bin")
         package:addenv("PATH", "Scripts")
-
-        if package:config("headeronly") then
-            package:set("links", "")
-        end
     end)
 
     on_fetch("fetch")
@@ -235,7 +225,5 @@ package("python")
         os.vrun("python -c \"import pip\"")
         os.vrun("python -c \"import setuptools\"")
         os.vrun("python -c \"import wheel\"")
-        if package:kind() ~= "binary" and not package:config("headeronly") then
-            assert(package:has_cfuncs("PyModule_New", {includes = "Python.h"}))
-        end
+        assert(package:has_cfuncs("PyModule_New", {includes = "Python.h"}))
     end)
