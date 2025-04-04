@@ -24,6 +24,8 @@ package("python")
     add_configs("ensurepip", {description = "'install' or 'upgrade' using bundled pip", default = nil, values = {true, false, "upgrade", "install", "no"}}) -- 3.6
     add_configs("emscripten_target", {description = "(wasm) Emscripten platform.", default = nil, type = "string", values = {"browser", "node"}})
 
+    add_configs("openssl3", {description = "Use OpenSSL v3.", default = true, type = "boolean"})
+
     if is_plat("windows", "msys", "mingw", "cygwin") then
         if is_arch("x64", "x86_64") then
             add_urls("https://github.com/xmake-mirror/python-windows/releases/download/$(version)/python-$(version).win64.zip")
@@ -80,12 +82,18 @@ package("python")
             package:add("syslinks", "util", "pthread", "dl")
         end
         
-        if pkgver:ge("3.7") then -- openssl, py module 'ssl', 'hashlib'
-            package:add("deps", "openssl >=1.0.2-a")
-        elseif pkgver:ge("3.10") then
-            package:add("deps", "openssl >=1.1.1-a")
-        else
-            package:add("deps", "openssl")
+        if not is_plat("wasm") then
+            if package:config("openssl3") then -- openssl, py module 'ssl', 'hashlib'
+                package:add("deps", "openssl3")
+            else
+                if pkgver:ge("3.7") then
+                    package:add("deps", "openssl >=1.0.2-a")
+                elseif pkgver:ge("3.10") then
+                    package:add("deps", "openssl >=1.1.1-a")
+                else
+                    package:add("deps", "openssl")
+                end
+            end
         end
 
         -- set includedirs
