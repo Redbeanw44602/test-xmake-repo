@@ -24,12 +24,12 @@ package("python")
     add_configs("ensurepip", {description = "'install' or 'upgrade' using bundled pip", default = nil, values = {true, false, "upgrade", "install", "no"}}) -- 3.6
     add_configs("emscripten_target", {description = "(wasm) Emscripten platform.", default = nil, type = "string", values = {"browser", "node"}})
 
-    if is_plat("windows") then
-        if is_arch("x64") then
+    if is_plat("windows", "msys", "mingw", "cygwin") then
+        if is_arch("x64", "x86_64") then
             add_urls("https://github.com/xmake-mirror/python-windows/releases/download/$(version)/python-$(version).win64.zip")
             add_versions("3.13.2", "baee66e4d1b16a220bf61d64a210676f6d6fef69c65959ffd9828264c7fe8ef5")
         end
-        if is_arch("x86") then
+        if is_arch("x86", "i386") then
             add_urls("https://github.com/xmake-mirror/python-windows/releases/download/$(version)/python-$(version).win32.zip")
             add_versions("3.13.2", "67ccaa5e8fb05e8e15a46f9262368fcfef190b1cfab3e2511acada7d68cf6464")
         end
@@ -56,13 +56,13 @@ package("python")
         -- add build dependencies
         package:add("deps", "bzip2") -- py module 'bz2'
         package:add("deps", "libb2") -- py module 'hashlib'
-        package:add("deps", "libffi") -- py module 'ctypes'
         package:add("deps", "libuuid") -- py module 'uuuid'
         package:add("deps", "zlib") -- py module 'gzip'
         package:add("deps", "ca-certificates") -- py module 'ssl'
         if is_plat("linux", "macosx", "bsd") then
             package:add("deps", "ncurses") -- py module 'curses'
             package:add("deps", "libedit") -- py module 'readline'
+            package:add("deps", "libffi") -- py module 'ctypes'
             if pkgver:ge("3.10") then -- sqlite3, py module 'sqlite3'
                 package:add("deps", "sqlite3 >=3.7.15")
             elseif pkgver:ge("3.13") then
