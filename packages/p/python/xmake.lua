@@ -104,7 +104,7 @@ package("python")
 
     on_fetch("fetch")
 
-    on_install("windows|x86", "windows|x64", "msys", "cygwin", function (package)
+    on_install("windows|x86", "windows|x64", "msys", "mingw", "cygwin", function (package)
         if package:version():ge("3.0") then
             os.cp("python.exe", path.join(package:installdir("bin"), "python3.exe"))
         else
@@ -123,7 +123,7 @@ package("python")
         end
     end)
 
-    on_install("macosx", "bsd", "linux", function (package)
+    on_install("macosx", "linux", "bsd", "android", "iphoneos", "wasm", function (package)
         local constants = import('constants')()
         function opt2cfg(cfg)
             if type(cfg) == "boolean" then
