@@ -3,25 +3,42 @@ package("python")
     set_description("The python programming language.")
     set_license("PSF")
 
-    if is_host("windows") then
-        if is_arch("x86", "i386") or os.arch() == "x86" then
-            add_urls("https://github.com/xmake-mirror/python-windows/releases/download/$(version)/python-$(version).win32.zip")
-            add_versions("3.13.1", "f89b297ca94ced2fbdad7919518ebf05005f39637f8ec5b01e42f2c71d53a673")
-        else
+    -- enable-FEATURE
+    includes(path.join(os.scriptdir(), "constants.lua"))
+    for _, feature in ipairs(constants.get_yn_features()) do
+        -- if the user doesn't pass it (nil), we won't pass it either.
+        add_configs(feature, {description = "Enable " .. feature .. ".", default = nil, type = "boolean"})
+    end
+
+    add_configs("framework", {description = "(macOS) Create a Python.framework rather than a traditional Unix install.", default = nil, type = "string"})
+    add_configs("experimental_jit", {description = "Build the experimental just-in-time compiler.", default = nil, values = {true, false, "no", "yes", "yes-off", "interpreter"}})
+    add_configs("big_digits", {description = "Use big digits for Python longs.", default = nil, type = "number", values = {15, 30}})
+
+    -- with-PACKAGE
+    add_configs("framework_name", {description = "(macOS) Specify the name for the python framework.", default = nil, type = "string"})
+    add_configs("app_store_compliance", {description = "(macOS) Enable any patches required for compiliance with app stores.", default = nil, type = "boolean"}) -- 3.13
+    add_configs("hash_algorithm", {description = "Select hash algorithm for use in Python/pyhash.c", default = nil, type = "string", values = {"fnv", "siphash13", "siphash24"}}) -- 3.4, 3.11
+    add_configs("builtin_hashlib_hashes", {description = "Builtin hash modules. (md5, sha1, sha2, sha3, blake2)", default = nil, type = "string"}) -- 3.9
+    add_configs("ssl_default_suites", {description = "Override default cipher suites string. (python, openssl)", default = nil, type = "string"}) -- 3.7, 3.10
+    add_configs("lto", {description = "Enable Link-Time-Optimization in any build.", default = nil, values = {true, false, "full", "thin", "no", "yes"}})
+    add_configs("ensurepip", {description = "'install' or 'upgrade' using bundled pip", default = nil, values = {true, false, "upgrade", "install", "no"}}) -- 3.6
+    add_configs("emscripten_target", {description = "(wasm) Emscripten platform.", default = nil, type = "string", values = {"browser", "node"}})
+
+    if is_plat("windows") then
+        if is_arch("x64") then
             add_urls("https://github.com/xmake-mirror/python-windows/releases/download/$(version)/python-$(version).win64.zip")
-            add_versions("3.13.1", "104d1de9eb6ff7c345c3415a57880dc0b2c51695515f2a87097512e6d77e977d")
+            add_versions("3.13.2", "baee66e4d1b16a220bf61d64a210676f6d6fef69c65959ffd9828264c7fe8ef5")
+        end
+        if is_arch("x86") then
+            add_urls("https://github.com/xmake-mirror/python-windows/releases/download/$(version)/python-$(version).win32.zip")
+            add_versions("3.13.2", "67ccaa5e8fb05e8e15a46f9262368fcfef190b1cfab3e2511acada7d68cf6464")
         end
     else
         add_urls("https://www.python.org/ftp/python/$(version)/Python-$(version).tgz")
-        add_versions("3.13.1", "1513925a9f255ef0793dbf2f78bb4533c9f184bdd0ad19763fd7f47a400a7c55")
+        add_versions("3.13.2", "b8d79530e3b7c96a5cb2d40d431ddb512af4a563e863728d8713039aa50203f9")
     end
 
-    if is_host("linux", "bsd") then
-        add_deps("libffi", "zlib", {host = true, private = true})
-        add_syslinks("util", "pthread", "dl")
-    end
-
-    on_load("windows", "msys", "cygwin", function (package)
+    on_load("windows", "msys", "mingw", "cygwin", function (package)
         -- set includedirs
         package:add("includedirs", "include")
 
@@ -32,21 +49,47 @@ package("python")
         package:addenv("PATH", "Scripts")
     end)
 
-    on_load("macosx", "linux", "bsd", function (package)
-        local version = package:version()
+    on_load("macosx", "linux", "bsd", "android", "iphoneos", "wasm", function (package)
+        local pkgver = package:version()
+        local pyver = ("python%d.%d"):format(pkgver:major(), pkgver:minor())
 
-        -- set openssl dep
-        if version:ge("3.10") then
-            -- starting with Python 3.10, Python requires OpenSSL 1.1.1 or newer
-            -- see https://peps.python.org/pep-0644/
-            package:add("deps", "openssl >=1.1.1-a", "ca-certificates", {host = true})
+        -- add build dependencies
+        package:add("deps", "bzip2") -- py module 'bz2'
+        package:add("deps", "libb2") -- py module 'hashlib'
+        package:add("deps", "libffi") -- py module 'ctypes'
+        package:add("deps", "libuuid") -- py module 'uuuid'
+        package:add("deps", "zlib") -- py module 'gzip'
+        package:add("deps", "ca-certificates") -- py module 'ssl'
+        if is_plat("linux", "macosx", "bsd") then
+            package:add("deps", "ncurses") -- py module 'curses'
+            package:add("deps", "libedit") -- py module 'readline'
+            if pkgver:ge("3.10") then -- sqlite3, py module 'sqlite3'
+                package:add("deps", "sqlite3 >=3.7.15")
+            elseif pkgver:ge("3.13") then
+                package:add("deps", "sqlite3 >=3.15.2")
+            else
+                package:add("deps", "sqlite3")
+            end
+        end
+        if is_plat("linux", "macosx") then
+            package:add("deps", "mpdecimal") -- py module 'decimal'
+            package:add("deps", "lzma") -- py module 'lzma'
+            package:add("deps", "readline") -- py module 'readline'
+        end
+        if is_plat("linux", "bsd") then
+            package:add("syslinks", "util", "pthread", "dl")
+        end
+        
+        if pkgver:ge("3.7") then -- openssl, py module 'ssl', 'hashlib'
+            package:add("deps", "openssl >=1.0.2-a")
+        elseif pkgver:ge("3.10") then
+            package:add("deps", "openssl >=1.1.1-a")
         else
-            package:add("deps", "openssl", "ca-certificates", {host = true})
+            package:add("deps", "openssl")
         end
 
         -- set includedirs
-        local pyver = ("python%d.%d"):format(version:major(), version:minor())
-        if version:ge("3.0") and version:le("3.8") then
+        if pkgver:ge("3.0") and pkgver:le("3.8") then
             package:add("includedirs", path.join("include", pyver .. "m"))
         else
             package:add("includedirs", path.join("include", pyver))
@@ -72,22 +115,41 @@ package("python")
         os.cp("Lib", package:installdir())
         os.cp("libs/*", package:installdir("lib"))
         os.cp("*", package:installdir())
-        local python = path.join(package:installdir("bin"), "python.exe")
-        os.vrunv(python, {"-m", "pip", "install", "--upgrade", "--force-reinstall", "pip"})
-        os.vrunv(python, {"-m", "pip", "install", "--upgrade", "setuptools"})
-        os.vrunv(python, {"-m", "pip", "install", "wheel"})
+        if package:config("pip") then
+            local python = path.join(package:installdir("bin"), "python.exe")
+            os.vrunv(python, {"-m", "pip", "install", "--upgrade", "--force-reinstall", "pip"})
+            os.vrunv(python, {"-m", "pip", "install", "--upgrade", "setuptools"})
+            os.vrunv(python, {"-m", "pip", "install", "wheel"})
+        end
     end)
 
     on_install("macosx", "bsd", "linux", function (package)
-        local version = package:version()
+        local constants = import('constants')()
+        function opt2cfg(cfg)
+            if type(cfg) == "boolean" then
+                return cfg and 'yes' or 'no'
+            end
+            return cfg
+        end
+
+        local pkgver = package:version()
+        local pyver = ("python%d.%d"):format(pkgver:major(), pkgver:minor())
 
         -- init configs
-        local configs = {"--enable-ipv6", "--with-ensurepip", "--enable-optimizations"}
+        local configs = {}
         table.insert(configs, "--libdir=" .. package:installdir("lib"))
-        table.insert(configs, "--with-platlibdir=lib")
         table.insert(configs, "--datadir=" .. package:installdir("share"))
         table.insert(configs, "--datarootdir=" .. package:installdir("share"))
-        table.insert(configs, "--enable-shared=" .. (package:config("shared") and "yes" or "no"))
+        for _, feature in ipairs(constants.get_all_features()) do
+            if package:config(feature) ~= nil then
+                table.insert(configs, ("--enable-%s=%s"):format(feature:gsub("_", "-"), opt2cfg(package:config(feature))))
+            end
+        end
+        for _, pkg in ipairs(constants.get_supported_packages()) do
+            if package:config(feature) ~= nil then
+                table.insert(configs, ("--with-%s=%s"):format(pkg:gsub("_", "-"), opt2cfg(package:config(feature))))
+            end
+        end
 
         -- add openssl libs path
         local openssl = package:dep("openssl"):fetch()
@@ -106,7 +168,7 @@ package("python")
                     end
                 end
                 if openssl_dir then
-                    if version:ge("3.0") then
+                    if pkgver:ge("3.0") then
                         table.insert(configs, "--with-openssl=" .. openssl_dir)
                     else
                         io.gsub("setup.py", "/usr/local/ssl", openssl_dir)
@@ -125,7 +187,6 @@ package("python")
         local cppflags = {}
         local ldflags = {}
         if package:is_plat("macosx") then
-
             -- get xcode information
             import("core.tool.toolchain")
             local xcode_dir
@@ -165,21 +226,6 @@ package("python")
             table.insert(cppflags, "-fPIC")
         end
 
-        -- add external path for zlib and libffi
-        for _, libname in ipairs({"zlib", "libffi"}) do
-            local lib = package:dep(libname)
-            if lib and not lib:is_system() then
-                local fetchinfo = lib:fetch({external = false})
-                if fetchinfo then
-                    for _, includedir in ipairs(fetchinfo.includedirs or fetchinfo.sysincludedirs) do
-                        table.insert(cppflags, "-I" .. includedir)
-                    end
-                    for _, linkdir in ipairs(fetchinfo.linkdirs) do
-                        table.insert(ldflags, "-L" .. linkdir)
-                    end
-                end
-            end
-        end
         if #cppflags > 0 then
             table.insert(configs, "CPPFLAGS=" .. table.concat(cppflags, " "))
         end
@@ -187,9 +233,8 @@ package("python")
             table.insert(configs, "LDFLAGS=" .. table.concat(ldflags, " "))
         end
 
-        local pyver = ("python%d.%d"):format(version:major(), version:minor())
         -- https://github.com/python/cpython/issues/109796
-        if version:ge("3.12.0") then
+        if pkgver:ge("3.12.0") then
             os.mkdir(package:installdir("lib", pyver))
         end
 
@@ -203,29 +248,39 @@ package("python")
         import("package.tools.autoconf").configure(package, configs, {envs = {PYTHONHOME = "", PYTHONPATH = ""}})
         os.vrunv("make", {"-j4", "PYTHONAPPSDIR=" .. package:installdir()})
         os.vrunv("make", {"install", "-j4", "PYTHONAPPSDIR=" .. package:installdir()})
-        if version:ge("3.0") then
+        if pkgver:ge("3.0") then
             os.cp(path.join(package:installdir("bin"), "python3"), path.join(package:installdir("bin"), "python"))
             os.cp(path.join(package:installdir("bin"), "python3-config"), path.join(package:installdir("bin"), "python-config"))
         end
 
         -- install wheel
-        local python = path.join(package:installdir("bin"), "python")
-        local envs = {
-            PATH = package:installdir("bin"),
-            PYTHONPATH = package:installdir("lib", pyver, "site-packages"),
-            LD_LIBRARY_PATH = package:installdir("lib")
-        }
-        os.vrunv(python, {"-m", "pip", "install", "--upgrade", "--force-reinstall", "pip"}, {envs = envs})
-        os.vrunv(python, {"-m", "pip", "install", "--upgrade", "setuptools"}, {envs = envs})
-        os.vrunv(python, {"-m", "pip", "install", "wheel"}, {envs = envs})
+        if package:config("ensurepip") then
+            local python = path.join(package:installdir("bin"), "python")
+            local envs = {
+                PATH = package:installdir("bin"),
+                PYTHONPATH = package:installdir("lib", pyver, "site-packages"),
+                LD_LIBRARY_PATH = package:installdir("lib")
+            }
+            os.vrunv(python, {"-m", "pip", "install", "--upgrade", "--force-reinstall", "pip"}, {envs = envs})
+            os.vrunv(python, {"-m", "pip", "install", "--upgrade", "setuptools"}, {envs = envs})
+            os.vrunv(python, {"-m", "pip", "install", "wheel"}, {envs = envs})
+        end
     end)
 
     on_test(function (package)
         if not package:is_cross() then
             os.vrun("python --version")
-            os.vrun("python -c \"import pip\"")
-            os.vrun("python -c \"import setuptools\"")
-            os.vrun("python -c \"import wheel\"")
+            if package:config("ensurepip") then
+                os.vrun("python -c \"import pip\"")
+                os.vrun("python -c \"import setuptools\"")
+                os.vrun("python -c \"import wheel\"")
+            end
         end
-        assert(package:has_cfuncs("PyModule_New", {includes = "Python.h"}))
+        assert(package:check_csnippets({test = [[
+            #include <Python.h>
+            void test() {
+                Py_Initialize();
+                Py_Finalize();
+            }
+        ]]}, {configs = {languages = 'c11'}}))
     end)
