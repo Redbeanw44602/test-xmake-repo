@@ -160,7 +160,7 @@ package("python")
         end
 
         -- add openssl libs path
-        local openssl = package:dep("openssl3" and package:config("openssl3") or "openssl"):fetch()
+        local openssl = package:dep(package:config("openssl3") and "openssl3" or "openssl"):fetch()
         if openssl then
             local openssl_dir
             for _, linkdir in ipairs(openssl.linkdirs) do
