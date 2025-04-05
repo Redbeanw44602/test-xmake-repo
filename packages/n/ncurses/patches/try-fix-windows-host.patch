@@ -1,0 +1,411 @@
+From 97b161c7dde9d59be7b6552d9e424dffe79247dd Mon Sep 17 00:00:00 2001
+From: Redbeanw44602 <redbeana44945@gmail.com>
+Date: Sat, 5 Apr 2025 18:10:20 +0800
+Subject: [PATCH] try fix windows host.
+
+---
+ Ada95/gen/Makefile.in     |  2 +-
+ Ada95/include/Makefile.in |  2 +-
+ Ada95/src/Makefile.in     | 24 ++++++++++++------------
+ c++/Makefile.in           |  6 +++---
+ include/Makefile.in       | 16 ++++++++--------
+ man/Makefile.in           |  8 ++++----
+ misc/Makefile.in          | 12 ++++++------
+ ncurses/Makefile.in       | 16 ++++++++--------
+ progs/Makefile.in         |  8 ++++----
+ test/Makefile.in          |  2 +-
+ 10 files changed, 48 insertions(+), 48 deletions(-)
+
+diff --git a/Ada95/gen/Makefile.in b/Ada95/gen/Makefile.in
+index 525ce99..e9e0fdb 100644
+--- a/Ada95/gen/Makefile.in
++++ b/Ada95/gen/Makefile.in
+@@ -297,7 +297,7 @@ realclean :: distclean
+ HTML_DIR = @ADAHTML_DIR@
+ 
+ options.m4 :
+-	$(SHELL) -c "if [ @cf_cv_enable_sigwinch@ = 0 ]; \
++	"$(SHELL)" -c "if [ @cf_cv_enable_sigwinch@ = 0 ]; \
+ 		then \
+ 			dashes='   --'; \
+ 		else \
+diff --git a/Ada95/include/Makefile.in b/Ada95/include/Makefile.in
+index 89bb27d..91017a1 100644
+--- a/Ada95/include/Makefile.in
++++ b/Ada95/include/Makefile.in
+@@ -81,7 +81,7 @@ install ::	$(AUTO_SRC)
+ uninstall ::
+ 
+ ncurses_def.h: $(srcdir)/ncurses_defs $(srcdir)/MKncurses_def.sh
+-	AWK=$(AWK) $(SHELL) $(srcdir)/MKncurses_def.sh $(srcdir)/ncurses_defs >$@
++	AWK=$(AWK) "$(SHELL)" $(srcdir)/MKncurses_def.sh $(srcdir)/ncurses_defs >$@
+ 
+ tags:
+ 	ctags *.[ch]
+diff --git a/Ada95/src/Makefile.in b/Ada95/src/Makefile.in
+index eb4489b..956cd09 100644
+--- a/Ada95/src/Makefile.in
++++ b/Ada95/src/Makefile.in
+@@ -289,13 +289,13 @@ STATIC_DIRS = \
+ @USE_GNAT_PROJECTS@		$(STATIC_DIRS)
+ @USE_GNAT_PROJECTS@	@cf_ada_config@gprconfig --batch --config=Ada --config=C,,,,@cf_ada_config_C@
+ @USE_GNAT_PROJECTS@	-rm -f $(GNAT_PROJECT)
+-@USE_GNAT_PROJECTS@	$(SHELL) $(srcdir)/library-cfg.sh static library.gpr $(CFLAGS_NORMAL) >$(GNAT_PROJECT)
++@USE_GNAT_PROJECTS@	"$(SHELL)" $(srcdir)/library-cfg.sh static library.gpr $(CFLAGS_NORMAL) >$(GNAT_PROJECT)
+ @USE_GNAT_PROJECTS@	@echo "Using GNAT Project:"
+-@USE_GNAT_MAKE_GPR@	@-$(SHELL) -c "diff -c $(srcdir)/library.gpr $(GNAT_PROJECT); exit 0"
++@USE_GNAT_MAKE_GPR@	@-"$(SHELL)" -c "diff -c $(srcdir)/library.gpr $(GNAT_PROJECT); exit 0"
+ @USE_GNAT_MAKE_GPR@	$(ADAMAKE) $(ADAMAKEFLAGS) -XLIB_KIND=static
+ @USE_GNAT_MAKE_GPR@	$(AR) $(ARFLAGS) $@ $(STATIC_C_OBJS)
+ @USE_GNAT_MAKE_GPR@	-rm -f $(GNAT_PROJECT)
+-@USE_GNAT_GPRBUILD@	@-$(SHELL) -c "diff -c library.gpr $(GNAT_PROJECT); exit 0"
++@USE_GNAT_GPRBUILD@	@-"$(SHELL)" -c "diff -c library.gpr $(GNAT_PROJECT); exit 0"
+ @USE_GNAT_GPRBUILD@	gprbuild -p $(ADAMAKEFLAGS) -XLIB_KIND=static
+ @USE_GNAT_GPRBUILD@	-rm -f $(GNAT_PROJECT)
+ 
+@@ -322,9 +322,9 @@ STATIC_DIRS = \
+ #@USE_GNAT_LIBRARIES@install.libs ::
+ #@USE_GNAT_LIBRARIES@	@cf_ada_config@gprconfig --batch --config=Ada --config=C,,,,@cf_ada_config_C@
+ #@USE_GNAT_LIBRARIES@	-rm -f $(GNAT_PROJECT)
+-#@USE_GNAT_LIBRARIES@	$(SHELL) $(srcdir)/library-cfg.sh static library.gpr $(CFLAGS_NORMAL) >$(GNAT_PROJECT)
++#@USE_GNAT_LIBRARIES@	"$(SHELL)" $(srcdir)/library-cfg.sh static library.gpr $(CFLAGS_NORMAL) >$(GNAT_PROJECT)
+ #@USE_GNAT_LIBRARIES@	@echo "Using GNAT Project:"
+-#@USE_GNAT_LIBRARIES@	@-$(SHELL) -c "diff -c library.gpr $(GNAT_PROJECT); exit 0"
++#@USE_GNAT_LIBRARIES@	@-"$(SHELL)" -c "diff -c library.gpr $(GNAT_PROJECT); exit 0"
+ #@USE_GNAT_LIBRARIES@
+ #@USE_GNAT_LIBRARIES@	gprinstall -m -v -f -p \
+ #@USE_GNAT_LIBRARIES@		--prefix="$(DESTDIR)$(prefix)" \
+@@ -346,9 +346,9 @@ uninstall.libs ::
+ #@USE_GNAT_LIBRARIES@uninstall.libs ::
+ #@USE_GNAT_LIBRARIES@	@cf_ada_config@gprconfig --batch --config=Ada --config=C,,,,@cf_ada_config_C@
+ #@USE_GNAT_LIBRARIES@	-rm -f $(GNAT_PROJECT)
+-#@USE_GNAT_LIBRARIES@	$(SHELL) $(srcdir)/library-cfg.sh static library.gpr $(CFLAGS_NORMAL) >$(GNAT_PROJECT)
++#@USE_GNAT_LIBRARIES@	"$(SHELL)" $(srcdir)/library-cfg.sh static library.gpr $(CFLAGS_NORMAL) >$(GNAT_PROJECT)
+ #@USE_GNAT_LIBRARIES@	@echo "Using GNAT Project:"
+-#@USE_GNAT_LIBRARIES@	@-$(SHELL) -c "diff -c library.gpr $(GNAT_PROJECT); exit 0"
++#@USE_GNAT_LIBRARIES@	@-"$(SHELL)" -c "diff -c library.gpr $(GNAT_PROJECT); exit 0"
+ #@USE_GNAT_LIBRARIES@
+ #@USE_GNAT_LIBRARIES@	gprinstall -v -f --prefix="$(DESTDIR)$(prefix)" --uninstall $(ADAMAKEFLAGS) -XLIB_KIND=static
+ #@USE_GNAT_LIBRARIES@
+@@ -357,7 +357,7 @@ uninstall.libs ::
+ 
+ @USE_GNAT_LIBRARIES@uninstall \
+ @USE_GNAT_LIBRARIES@uninstall.libs ::
+-@USE_GNAT_LIBRARIES@	@$(SHELL) -c 'for name in $(BUILD_DIR)/static-ali/*.ali ; do rm -f $(ADA_OBJECTS)/`basename $$name`; done'
++@USE_GNAT_LIBRARIES@	@"$(SHELL)" -c 'for name in $(BUILD_DIR)/static-ali/*.ali ; do rm -f $(ADA_OBJECTS)/`basename $$name`; done'
+ 
+ $(BUILD_DIR)/dynamic-ali : ; mkdir -p $@
+ $(BUILD_DIR)/dynamic-obj : ; mkdir -p $@
+@@ -375,9 +375,9 @@ SHARED_DIRS = \
+ @MAKE_ADA_SHAREDLIB@	cp $(SHARED_OBJS) $(BUILD_DIR)/dynamic-obj/
+ @MAKE_ADA_SHAREDLIB@	@cf_ada_config@gprconfig --batch --config=Ada --config=C,,,,@cf_ada_config_C@
+ @MAKE_ADA_SHAREDLIB@	-rm -f $(GNAT_PROJECT)
+-@MAKE_ADA_SHAREDLIB@	$(SHELL) $(srcdir)/library-cfg.sh dynamic library.gpr $(CFLAGS_SHARED) >$(GNAT_PROJECT)
++@MAKE_ADA_SHAREDLIB@	"$(SHELL)" $(srcdir)/library-cfg.sh dynamic library.gpr $(CFLAGS_SHARED) >$(GNAT_PROJECT)
+ @MAKE_ADA_SHAREDLIB@	@echo "Making Ada shared-lib:"
+-@MAKE_ADA_SHAREDLIB@	@-$(SHELL) -c "diff -c library.gpr $(GNAT_PROJECT); exit 0"
++@MAKE_ADA_SHAREDLIB@	@-"$(SHELL)" -c "diff -c library.gpr $(GNAT_PROJECT); exit 0"
+ @MAKE_ADA_SHAREDLIB@	$(ADAMAKE) $(ADAMAKEFLAGS) -XLIB_KIND=dynamic
+ @MAKE_ADA_SHAREDLIB@	-rm -f $(GNAT_PROJECT)
+ 
+@@ -395,7 +395,7 @@ install.libs :: $(ADA_INCLUDE)
+ 
+ uninstall \
+ uninstall.libs ::
+-	$(SHELL) -c 'for name in $(SOURCE_DIR_SRC)/*.ad[sb] $(GENERATED_SOURCES); do rm -f $(ADA_INCLUDE)/`basename $$name`; done'
++	"$(SHELL)" -c 'for name in $(SOURCE_DIR_SRC)/*.ad[sb] $(GENERATED_SOURCES); do rm -f $(ADA_INCLUDE)/`basename $$name`; done'
+ 
+ @MAKE_ADA_SHAREDLIB@install \
+ @MAKE_ADA_SHAREDLIB@install.libs :: $(ADA_OBJECTS) $(LIBDIR)
+@@ -409,7 +409,7 @@ uninstall.libs ::
+ @MAKE_ADA_SHAREDLIB@
+ @MAKE_ADA_SHAREDLIB@uninstall \
+ @MAKE_ADA_SHAREDLIB@uninstall.libs ::
+-@MAKE_ADA_SHAREDLIB@	$(SHELL) -c 'for name in $(BUILD_DIR)/dynamic-ali/* ; do rm -f $(ADA_OBJECTS)/`basename $$name`; done'
++@MAKE_ADA_SHAREDLIB@	"$(SHELL)" -c 'for name in $(BUILD_DIR)/dynamic-ali/* ; do rm -f $(ADA_OBJECTS)/`basename $$name`; done'
+ @MAKE_ADA_SHAREDLIB@
+ @MAKE_ADA_SHAREDLIB@uninstall \
+ @MAKE_ADA_SHAREDLIB@uninstall.libs ::
+diff --git a/c++/Makefile.in b/c++/Makefile.in
+index 99f21da..6258637 100644
+--- a/c++/Makefile.in
++++ b/c++/Makefile.in
+@@ -198,7 +198,7 @@ mostlyclean ::
+ 	-rm -f core tags TAGS *~ *.bak *.i *.ii *.ln *.atac trace
+ 
+ clean :: mostlyclean
+-	-$(SHELL) -c "if test -n '$x' ; then $(MAKE) clean x=''; fi"
++	-"$(SHELL)" -c "if test -n '$x' ; then $(MAKE) clean x=''; fi"
+ 	-rm -rf $(MODEL)/SunWS_cache
+ 	-$(LIBTOOL_CLEAN) rm -f demo$x $(AUTO_SRC) $(LIBRARIES) $(OBJS_DEMO)
+ 	-rm -rf .libs *.dSYM
+@@ -273,11 +273,11 @@ demo$x:	$(OBJS_DEMO) \
+ 
+ etip.h:	$(srcdir)/etip.h.in $(srcdir)/edit_cfg.sh
+ 	cp $(srcdir)/etip.h.in $@
+-	$(SHELL) $(srcdir)/edit_cfg.sh ../include/ncurses_cfg.h $@
++	"$(SHELL)" $(srcdir)/edit_cfg.sh ../include/ncurses_cfg.h $@
+ 
+ # Verify that each header-file can be compiled without including another.
+ check ::
+-	@$(SHELL) -c "for header in *.h;\
++	@"$(SHELL)" -c "for header in *.h;\
+ 		do \
+ 			[ \$${header} = etip.h ] && continue; \
+ 			echo \"** testing \$${header}\" ; \
+diff --git a/include/Makefile.in b/include/Makefile.in
+index 351383b..6667154 100644
+--- a/include/Makefile.in
++++ b/include/Makefile.in
+@@ -118,26 +118,26 @@ curses.h :	$(CAPLIST) \
+ 		$(srcdir)/curses.tail \
+ 		$(srcdir)/MKkey_defs.sh
+ 	cat curses.head >$@
+-	AWK=$(AWK) $(SHELL) $(srcdir)/MKkey_defs.sh $(CAPLIST) >>$@
+-	$(SHELL) -c 'if test "@NCURSES_WGETCH_EVENTS@" = "1" ; then cat $(srcdir)/curses.events >>$@ ; fi'
+-	$(SHELL) -c 'if test "@NCURSES_CH_T@" = "cchar_t" ; then cat $(srcdir)/curses.wide >>$@ ; fi'
++	AWK=$(AWK) "$(SHELL)" $(srcdir)/MKkey_defs.sh $(CAPLIST) >>$@
++	"$(SHELL)" -c 'if test "@NCURSES_WGETCH_EVENTS@" = "1" ; then cat $(srcdir)/curses.events >>$@ ; fi'
++	"$(SHELL)" -c 'if test "@NCURSES_CH_T@" = "cchar_t" ; then cat $(srcdir)/curses.wide >>$@ ; fi'
+ 	cat $(srcdir)/curses.tail >>$@
+ 
+ term.h: 	$(CAPLIST) \
+ 		MKterm.h.awk
+ 	$(AWK) -f MKterm.h.awk $(CAPLIST) > $@
+-	$(SHELL) $(srcdir)/edit_cfg.sh ../include/ncurses_cfg.h $@
++	"$(SHELL)" $(srcdir)/edit_cfg.sh ../include/ncurses_cfg.h $@
+ 
+ hashsize.h:	$(CAPLIST) \
+ 		$(srcdir)/MKhashsize.sh
+-	$(SHELL) $(srcdir)/MKhashsize.sh $(CAPLIST) >$@
++	"$(SHELL)" $(srcdir)/MKhashsize.sh $(CAPLIST) >$@
+ 
+ ncurses_def.h: $(srcdir)/ncurses_defs $(srcdir)/MKncurses_def.sh
+-	AWK=$(AWK) $(SHELL) $(srcdir)/MKncurses_def.sh $(srcdir)/ncurses_defs >$@
++	AWK=$(AWK) "$(SHELL)" $(srcdir)/MKncurses_def.sh $(srcdir)/ncurses_defs >$@
+ 
+ parametrized.h: $(CAPLIST) \
+ 		$(srcdir)/MKparametrized.sh
+-	AWK=$(AWK) $(SHELL) $(srcdir)/MKparametrized.sh $(CAPLIST) >$@
++	AWK=$(AWK) "$(SHELL)" $(srcdir)/MKparametrized.sh $(CAPLIST) >$@
+ 
+ # This is required by pthread.h on MinGW
+ config.h:
+@@ -163,7 +163,7 @@ realclean :: distclean
+ 
+ # Verify that each header-file can be compiled without including another.
+ check:
+-	@$(SHELL) -c "for header in *.h;\
++	@"$(SHELL)" -c "for header in *.h;\
+ 		do \
+ 			echo \"** testing \$${header}\" ; \
+ 			echo \"#include <\$${header}>\" >headers.c; \
+diff --git a/man/Makefile.in b/man/Makefile.in
+index 9d08a7e..e841d08 100644
+--- a/man/Makefile.in
++++ b/man/Makefile.in
+@@ -78,10 +78,10 @@ $(DESTDIR)$(mandir) :
+ EDITARGS = $(DESTDIR)$(mandir) $(srcdir) terminfo.5 *-config.1 $(srcdir)/*.[0-9]*
+ 
+ install install.man : terminfo.5 $(DESTDIR)$(mandir)
+-	$(SHELL) ../edit_man.sh normal installing $(EDITARGS)
++	"$(SHELL)" ../edit_man.sh normal installing $(EDITARGS)
+ 
+ uninstall uninstall.man :
+-	-$(SHELL) ../edit_man.sh normal removing $(EDITARGS)
++	-"$(SHELL)" ../edit_man.sh normal removing $(EDITARGS)
+ 
+ # We compose terminfo.5 from the real sources...
+ CAPLIST	= \
+@@ -91,7 +91,7 @@ terminfo.5: $(srcdir)/terminfo.head \
+ 		$(CAPLIST) \
+ 		$(srcdir)/terminfo.tail \
+ 		Makefile $(srcdir)/MKterminfo.sh
+-	$(SHELL) $(srcdir)/MKterminfo.sh $(srcdir)/terminfo.head $(CAPLIST) $(srcdir)/terminfo.tail >terminfo.5
++	"$(SHELL)" $(srcdir)/MKterminfo.sh $(srcdir)/terminfo.head $(CAPLIST) $(srcdir)/terminfo.tail >terminfo.5
+ 
+ mostlyclean :
+ 	-rm -f core tags TAGS *~ *.bak *.ln *.atac trace
+@@ -100,7 +100,7 @@ clean:	mostlyclean
+ 	rm -f terminfo.5
+ 
+ ../edit_man.sed : make_sed.sh
+-	$(SHELL) $(srcdir)/make_sed.sh @MANPAGE_RENAMES@ >../edit_man.sed
++	"$(SHELL)" $(srcdir)/make_sed.sh @MANPAGE_RENAMES@ >../edit_man.sed
+ 
+ distclean realclean: clean
+ 	-rm -f Makefile *-config.1 ../edit_man.* ../man_alias.* man_db.renames
+diff --git a/misc/Makefile.in b/misc/Makefile.in
+index 1539973..7a8e57b 100644
+--- a/misc/Makefile.in
++++ b/misc/Makefile.in
+@@ -116,9 +116,9 @@ sources ::
+ @MAKE_DATABASE@	ticdir=${ticdir} \
+ @MAKE_DATABASE@	source=terminfo.tmp \
+ @MAKE_DATABASE@	cross_compiling=@cross_compiling@ \
+-@MAKE_DATABASE@	$(SHELL) ./run_tic.sh
++@MAKE_DATABASE@	"$(SHELL)" ./run_tic.sh
+ @MAKE_DATABASE@	@( cd $(srcdir)/tabset && \
+-@MAKE_DATABASE@		$(SHELL) -c 'for i in * ; do \
++@MAKE_DATABASE@		"$(SHELL)" -c 'for i in * ; do \
+ @MAKE_DATABASE@			if test -f $$i ; then \
+ @MAKE_DATABASE@			echo installing $$i; \
+ @MAKE_DATABASE@			$(INSTALL_DATA) $$i $(DESTDIR)$(tabsetdir)/$$i; \
+@@ -147,7 +147,7 @@ install.libs :: $(DESTDIR)$(bindir) ncurses-config
+ # directory during this rule:
+ @MAKE_PC_FILES@install \
+ @MAKE_PC_FILES@install.libs :: pc-files
+-@MAKE_PC_FILES@	@$(SHELL) -c 'case "x$(PKG_CONFIG_LIBDIR)" in \
++@MAKE_PC_FILES@	@"$(SHELL)" -c 'case "x$(PKG_CONFIG_LIBDIR)" in \
+ @MAKE_PC_FILES@		x/*) \
+ @MAKE_PC_FILES@			mkdir -p $(DESTDIR)$(PKG_CONFIG_LIBDIR); \
+ @MAKE_PC_FILES@			for name in $(PC_FILES); do \
+@@ -164,7 +164,7 @@ install.libs :: $(DESTDIR)$(bindir) ncurses-config
+ @MAKE_PC_FILES@all \
+ @MAKE_PC_FILES@sources :: pc-files
+ @MAKE_PC_FILES@pc-files :
+-@MAKE_PC_FILES@	$(SHELL) ./gen-pkgconfig
++@MAKE_PC_FILES@	"$(SHELL)" ./gen-pkgconfig
+ @MAKE_PC_FILES@	-touch $@
+ 
+ terminfo.tmp : run_tic.sed $(source)
+@@ -175,7 +175,7 @@ run_tic.sed :
+ 	WHICH_XTERM=@WHICH_XTERM@ \
+ 	XTERM_KBS=@XTERM_KBS@ \
+ 	datadir=${datadir} \
+-	$(SHELL) $(srcdir)/gen_edit.sh >$@
++	"$(SHELL)" $(srcdir)/gen_edit.sh >$@
+ 
+ $(DESTDIR)$(bindir) \
+ $(DESTDIR)$(libdir) \
+@@ -192,7 +192,7 @@ uninstall.data :
+ 
+ uninstall.libs :
+ 	-rm -f $(DESTDIR)$(bindir)/$(NCURSES_CONFIG)
+-@MAKE_PC_FILES@	@$(SHELL) -c 'case x$(DESTDIR)$(PKG_CONFIG_LIBDIR) in \
++@MAKE_PC_FILES@	@"$(SHELL)" -c 'case x$(DESTDIR)$(PKG_CONFIG_LIBDIR) in \
+ @MAKE_PC_FILES@	x/*) \
+ @MAKE_PC_FILES@		for name in $(PC_FILES); do \
+ @MAKE_PC_FILES@			test -f $$name || continue; \
+diff --git a/ncurses/Makefile.in b/ncurses/Makefile.in
+index ae198df..c938765 100644
+--- a/ncurses/Makefile.in
++++ b/ncurses/Makefile.in
+@@ -242,16 +242,16 @@ $(DESTDIR)$(libdir) :
+ ../lib : ; mkdir $@
+ 
+ ./fallback.c : $(tinfo)/MKfallback.sh
+-	$(SHELL) -e $(tinfo)/MKfallback.sh $(TERMINFO) $(TERMINFO_SRC) "$(TIC_PATH)" "$(INFOCMP_PATH)" $(FALLBACK_LIST) >$@
++	"$(SHELL)" -e $(tinfo)/MKfallback.sh $(TERMINFO) $(TERMINFO_SRC) "$(TIC_PATH)" "$(INFOCMP_PATH)" $(FALLBACK_LIST) >$@
+ 
+ ./lib_gen.c : $(base)/MKlib_gen.sh ../include/curses.h
+-	FGREP="@FGREP@" $(SHELL) -e $(base)/MKlib_gen.sh "$(CPP) $(CPPFLAGS)" "$(AWK)" generated <../include/curses.h >$@
++	FGREP="@FGREP@" "$(SHELL)" -e $(base)/MKlib_gen.sh "$(CPP) $(CPPFLAGS)" "$(AWK)" generated <../include/curses.h >$@
+ 
+ init_keytry.h : make_keys$(BUILD_EXEEXT) keys.list
+ 	./make_keys$(BUILD_EXEEXT) keys.list > $@
+ 
+ keys.list :	$(tinfo)/MKkeys_list.sh
+-	AWK=$(AWK) USE_SIGWINCH=@cf_cv_enable_sigwinch@ $(SHELL) $(tinfo)/MKkeys_list.sh $(CAPLIST) | LC_ALL=C sort >$@
++	AWK=$(AWK) USE_SIGWINCH=@cf_cv_enable_sigwinch@ "$(SHELL)" $(tinfo)/MKkeys_list.sh $(CAPLIST) | LC_ALL=C sort >$@
+ 
+ make_keys$(BUILD_EXEEXT) : \
+ 		build.priv.h \
+@@ -272,20 +272,20 @@ report_offsets$(BUILD_EXEEXT) : \
+ 	./report_offsets$(BUILD_EXEEXT)
+ 
+ ./expanded.c : $(srcdir)/curses.priv.h $(serial)/MKexpanded.sh
+-	$(SHELL) -e $(serial)/MKexpanded.sh "$(CPP)" $(CPPFLAGS) > $@
++	"$(SHELL)" -e $(serial)/MKexpanded.sh "$(CPP)" $(CPPFLAGS) > $@
+ 
+ ./comp_captab.c: \
+ 		make_hash$(BUILD_EXEEXT) \
+ 		../include/hashsize.h \
+ 		$(tinfo)/MKcaptab.sh \
+ 		$(tinfo)/MKcaptab.awk
+-	$(SHELL) -e $(tinfo)/MKcaptab.sh $(AWK) $(USE_BIG_STRINGS) $(tinfo)/MKcaptab.awk $(CAPLIST) > $@
++	"$(SHELL)" -e $(tinfo)/MKcaptab.sh $(AWK) $(USE_BIG_STRINGS) $(tinfo)/MKcaptab.awk $(CAPLIST) > $@
+ 
+ ./comp_userdefs.c: \
+ 		make_hash$(BUILD_EXEEXT) \
+ 		../include/hashsize.h \
+ 		$(tinfo)/MKuserdefs.sh
+-	$(SHELL) -e $(tinfo)/MKuserdefs.sh $(AWK) $(USE_BIG_STRINGS) $(CAPLIST) > $@
++	"$(SHELL)" -e $(tinfo)/MKuserdefs.sh $(AWK) $(USE_BIG_STRINGS) $(CAPLIST) > $@
+ 
+ ./lib_keyname.c: keys.list $(base)/MKkeyname.awk
+ 	$(AWK) -f $(base)/MKkeyname.awk use_sigwinch=@cf_cv_enable_sigwinch@ bigstrings=$(USE_BIG_STRINGS) keys.list > $@
+@@ -333,7 +333,7 @@ realclean :: distclean
+ test_progs : $(TEST_PROGS)
+ 
+ ./link_test.c : $(base)/MKlib_gen.sh ../include/curses.h
+-	FGREP="@FGREP@" $(SHELL) -e $(base)/MKlib_gen.sh "$(CPP) $(CPPFLAGS)" "$(AWK)" implemented <../include/curses.h >$@
++	FGREP="@FGREP@" "$(SHELL)" -e $(base)/MKlib_gen.sh "$(CPP) $(CPPFLAGS)" "$(AWK)" implemented <../include/curses.h >$@
+ 
+ captoinfo$x : $(tinfo)/captoinfo.c $(TEST_DEPS)
+ 	@ECHO_LD@ $(LIBTOOL_LINK) -o $@ $(CFLAGS_DEFAULT) -DMAIN $(tinfo)/captoinfo.c $(TEST_LDFLAGS)
+@@ -363,7 +363,7 @@ report_hashing$x : \
+ # Verify that each header-file can be compiled without including another.
+ @MAKE_PHONY@.PHONY :	check_headers
+ check_headers:
+-	@$(SHELL) -c "for header in *.h;\
++	@"$(SHELL)" -c "for header in *.h;\
+ 		do \
+ 			echo \"** testing \$${header}\" ; \
+ 			echo \"#include <\$${header}>\" >headers.c; \
+diff --git a/progs/Makefile.in b/progs/Makefile.in
+index 218e64e..ad85971 100644
+--- a/progs/Makefile.in
++++ b/progs/Makefile.in
+@@ -222,7 +222,7 @@ transform.h :
+ 	echo "#define __TRANSFORM_H 1"					>>$@
+ 	echo "#include <progs.priv.h>"					>>$@
+ 	echo "extern bool same_program(const char *, const char *);"	>>$@
+-	-$(SHELL) -c 'if test -n "$x" ; then echo "#define SUFFIX_IGNORED \"$x\"">>$@; fi'
++	-"$(SHELL)" -c 'if test -n "$x" ; then echo "#define SUFFIX_IGNORED \"$x\"">>$@; fi'
+ 	echo "#define PROG_CAPTOINFO \"$(define_captoinfo)\""		>>$@
+ 	echo "#define PROG_INFOTOCAP \"$(define_infotocap)\""		>>$@
+ 	echo "#define PROG_CLEAR     \"$(define_clear)\""		>>$@
+@@ -325,7 +325,7 @@ tset$x: $(DEPS_TSET) $(DEPS_CURSES) transform.h
+ 	@ECHO_LD@ $(LINK) $(DEPS_TSET) $(LDFLAGS_TINFO) -o $@
+ 
+ termsort.h: $(srcdir)/MKtermsort.sh
+-	$(SHELL) $(srcdir)/MKtermsort.sh $(AWK) $(srcdir)/../include/@TERMINFO_CAPS@ >$@
++	"$(SHELL)" $(srcdir)/MKtermsort.sh $(AWK) $(srcdir)/../include/@TERMINFO_CAPS@ >$@
+ 
+ #
+ # Utility productions start here
+@@ -341,7 +341,7 @@ mostlyclean ::
+ 	-rm -f core tags TAGS *~ *.bak *.i *.ln *.atac trace
+ 
+ clean :: mostlyclean
+-	-$(SHELL) -c "if test -n '$x' ; then $(MAKE) clean x=''; fi"
++	-"$(SHELL)" -c "if test -n '$x' ; then $(MAKE) clean x=''; fi"
+ 	-rm -f $(AUTO_SRC)
+ 	-rm -f $(PROGS)
+ 	-rm -rf .libs *.dSYM
+@@ -370,7 +370,7 @@ lint:
+ 
+ # Verify that each header-file can be compiled without including another.
+ check:
+-	@$(SHELL) -c "for header in *.h;\
++	@"$(SHELL)" -c "for header in *.h;\
+ 		do \
+ 			echo \"** testing \$${header}\" ; \
+ 			echo \"#include <\$${header}>\" >headers.c; \
+diff --git a/test/Makefile.in b/test/Makefile.in
+index 1d54628..02c6068 100644
+--- a/test/Makefile.in
++++ b/test/Makefile.in
+@@ -165,7 +165,7 @@ all::
+ 
+ # Verify that each header-file can be compiled without including another.
+ check::
+-	@$(SHELL) -c "for header in *.h;\
++	@"$(SHELL)" -c "for header in *.h;\
+ 		do \
+ 			echo \"** testing \$${header}\" ; \
+ 			echo \"#include <\$${header}>\" >headers.c; \
+-- 
+2.49.0
+

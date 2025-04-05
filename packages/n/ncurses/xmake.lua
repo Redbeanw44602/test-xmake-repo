@@ -15,6 +15,8 @@ package("ncurses")
 
     add_configs("widec", {description = "Compile with wide-char/UTF-8 code.", default = true, type = "boolean"})
 
+    add_patches("*", "patches/try-fix-windows-host.patch", "83628b33433d470abd086aa45d3d3d989719e45f356a0d5a48a57d1ef2fbce42")
+
     if is_plat("linux") then
         add_extsources("apt::libncurses-dev")
     end
