@@ -51,7 +51,7 @@ package("python")
         package:addenv("PATH", "Scripts")
     end)
 
-    on_load("macosx", "linux", "bsd", "android", "iphoneos", "wasm", function (package)
+    on_load("macosx", "linux", "bsd", function (package)
         local pkgver = package:version()
         local pyver = ("python%d.%d"):format(pkgver:major(), pkgver:minor())
 
@@ -131,7 +131,8 @@ package("python")
         end
     end)
 
-    on_install("macosx", "linux", "bsd", "android", "iphoneos", "wasm", function (package)
+    --- android, iphoneos, wasm unsupported: dependencies not resolved.
+    on_install("macosx", "linux", "bsd", function (package)
         local constants = import('constants')()
         function opt2cfg(cfg)
             if type(cfg) == "boolean" then
