@@ -40,6 +40,7 @@ package("ncurses")
             "--with-gpm=no",
             "--without-tests",
             "--without-ada",
+            "--disable-stripping" -- for cross compiling.
         }
 
         table.insert(configs, "--with-debug=" .. (package:is_debug() and "yes" or "no"))
