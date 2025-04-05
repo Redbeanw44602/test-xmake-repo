@@ -15,8 +15,6 @@ package("ncurses")
 
     add_configs("widec", {description = "Compile with wide-char/UTF-8 code.", default = true, type = "boolean"})
 
-    add_patches("*", "patches/try-fix-windows-host.patch", "83628b33433d470abd086aa45d3d3d989719e45f356a0d5a48a57d1ef2fbce42")
-
     if is_plat("linux") then
         add_extsources("apt::libncurses-dev")
     end
@@ -36,9 +34,10 @@ package("ncurses")
     end)
 
     on_install("linux", "macosx", "bsd", "android", function (package)
-        import("package.tools.autoconf")
+        for _, path in ipairs(os.files("./**/Makefile.in")) do
+            io.gsub(path, "$(SHELL)", "\"$(SHELL)\"")
+        end
 
-        local options = { arflags = {"-curvU"} }
         local configs = {
             "--without-manpages",
             "--enable-sigwinch",
@@ -51,12 +50,7 @@ package("ncurses")
         table.insert(configs, "--with-debug=" .. (package:is_debug() and "yes" or "no"))
         table.insert(configs, "--with-shared=" .. (package:config("shared") and "yes" or "no"))
         table.insert(configs, "--enable-widec=" .. (package:config("widec") and "yes" or "no"))
-        if is_host("windows") then
-            options.envs = table.join(autoconf.buildenvs(package), {
-                SHELL = "sh"
-            })
-        end
-        autoconf.install(package, configs, options)
+        import("package.tools.autoconf").install(package, configs, {arflags = {"-curvU"}})
     end)
 
     on_test(function (package)
