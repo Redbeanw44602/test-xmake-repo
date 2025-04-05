@@ -34,6 +34,9 @@ package("ncurses")
     end)
 
     on_install("linux", "macosx", "bsd", "android", function (package)
+        import("package.tools.autoconf")
+
+        local options = { arflags = {"-curvU"} }
         local configs = {
             "--without-manpages",
             "--enable-sigwinch",
@@ -47,9 +50,11 @@ package("ncurses")
         table.insert(configs, "--with-shared=" .. (package:config("shared") and "yes" or "no"))
         table.insert(configs, "--enable-widec=" .. (package:config("widec") and "yes" or "no"))
         if is_host("windows") then
-            os.setenv("SHELL", os.getenv("SHELL"):gsub("Program Files", "Progra~1"))
+            options.envs = table.join(autoconf.buildenvs(package), {
+                SHELL = "sh"
+            })
         end
-        import("package.tools.autoconf").install(package, configs, {arflags = {"-curvU"}})
+        autoconf.install(package, configs, options)
     end)
 
     on_test(function (package)
