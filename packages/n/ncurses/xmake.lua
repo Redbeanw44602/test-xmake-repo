@@ -35,7 +35,7 @@ package("ncurses")
 
     on_install("linux", "macosx", "bsd", "android", function (package)
         for _, path in ipairs(os.files("./**/Makefile.in")) do
-            io.gsub(path, "$(SHELL)", "\"$(SHELL)\"")
+            io.replace(path, "$(SHELL)", "\"$(SHELL)\"", {plain = true})
         end
 
         local configs = {
