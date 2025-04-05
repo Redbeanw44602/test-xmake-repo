@@ -33,7 +33,7 @@ package("ncurses")
         end
     end)
 
-    on_install("linux", "macosx", "bsd", "android", "msys", "mingw", "cygwin", function (package)
+    on_install("linux", "macosx", "bsd", "android", function (package)
         local configs = {
             "--without-manpages",
             "--enable-sigwinch",
@@ -46,6 +46,9 @@ package("ncurses")
         table.insert(configs, "--with-debug=" .. (package:is_debug() and "yes" or "no"))
         table.insert(configs, "--with-shared=" .. (package:config("shared") and "yes" or "no"))
         table.insert(configs, "--enable-widec=" .. (package:config("widec") and "yes" or "no"))
+        if is_host("windows") then
+            os.setenv("SHELL", os.getenv("SHELL"):gsub("Program Files", "Progra~1"))
+        end
         import("package.tools.autoconf").install(package, configs, {arflags = {"-curvU"}})
     end)
 
